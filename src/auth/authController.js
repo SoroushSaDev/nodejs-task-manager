@@ -1,28 +1,38 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const User = require('../models/User');
 
-const users = []; // Temporary in-memory users
-const JWT_SECRET = 'yourSecretKey'; // In real apps use env vars
+const JWT_SECRET = process.env.JWT_SECRET || 'yourSecretKey';
 
 exports.register = async (req, res) => {
-  const { username, password } = req.body;
-  const existingUser = users.find(u => u.username === username);
-  if (existingUser) return res.status(400).json({ error: 'User already exists' });
+    const {username, password} = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ username, password: hashedPassword });
+    try {
+        const existingUser = await User.findOne({username});
+        if (existingUser) return res.status(400).json({error: 'User already exists'});
 
-  res.status(201).json({ message: 'User registered successfully' });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({username, password: hashedPassword});
+
+        res.status(201).json({message: 'User registered successfully'});
+    } catch (err) {
+        res.status(500).json({error: 'Registration failed'});
+    }
 };
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find(u => u.username === username);
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    const {username, password} = req.body;
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+    try {
+        const user = await User.findOne({username});
+        if (!user) return res.status(401).json({error: 'Invalid credentials'});
 
-  const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token });
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.status(401).json({error: 'Invalid credentials'});
+
+        const token = jwt.sign({userId: user._id}, JWT_SECRET, {expiresIn: '1h'});
+        res.json({token});
+    } catch (err) {
+        res.status(500).json({error: 'Login failed'});
+    }
 };
