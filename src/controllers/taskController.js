@@ -1,32 +1,33 @@
-let tasks = [
-    { id: 1, title: 'First Task', completed: false },
-    { id: 2, title: 'Second Task', completed: true }
-  ];
-  
-  // GET /tasks
-  exports.getAllTasks = (req, res) => {
-    res.json(tasks);
-  };
-  
-  // POST /tasks
-  exports.createTask = (req, res) => {
-    const { title } = req.body;
-  
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-  
-    const newTask = {
-      id: tasks.length + 1,
-      title,
-      completed: false
-    };
-  
-    tasks.push(newTask);
-    res.status(201).json(newTask);
-  };
+const { PrismaClient } = require('@prisma/client');
 
-  // PUT /tasks/:id
+const prisma = new PrismaClient();
+  
+// GET /tasks
+exports.getAllTasks = async (req, res) => {
+  try {
+    const tasks = await prisma.task.findMany({
+      include: { user: true }
+    })
+    res.json(tasks)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+};
+  
+// POST /tasks
+exports.createTask = async (req, res) => {
+  const { title, description, userId } = req.body
+  try {
+    const task = await prisma.task.create({
+      data: { title, description, userId }
+    })
+    res.status(201).json(task)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+};
+
+// PUT /tasks/:id
 exports.updateTask = (req, res) => {
     const { id } = req.params;
     const { title, completed } = req.body;
@@ -43,15 +44,15 @@ exports.updateTask = (req, res) => {
     res.json(task);
   };
   
-  // DELETE /tasks/:id
-  exports.deleteTask = (req, res) => {
-    const { id } = req.params;
-    const index = tasks.findIndex(t => t.id === parseInt(id));
-  
-    if (index === -1) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-  
-    const deletedTask = tasks.splice(index, 1);
-    res.json(deletedTask[0]);
-  };
+// DELETE /tasks/:id
+exports.deleteTask = (req, res) => {
+  const { id } = req.params;
+  const index = tasks.findIndex(t => t.id === parseInt(id));
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+
+  const deletedTask = tasks.splice(index, 1);
+  res.json(deletedTask[0]);
+};

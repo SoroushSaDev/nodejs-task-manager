@@ -1,6 +1,6 @@
 const express = require('express');
-const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require('./auth/authRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
