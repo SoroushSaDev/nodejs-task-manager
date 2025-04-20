@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const {faker} = require('@faker-js/faker');
 require('dotenv').config();
 
-const User = require('./src/models/User');
-const Task = require('./src/models/Task');
+const User = require('./models/User');
+const Task = require('./models/Task');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/task-manager';
 const JWT_SECRET = process.env.JWT_SECRET || 'yourSuperSecretJWTkey';
@@ -24,12 +24,12 @@ async function seed() {
 
         // Create a fake user
         const user = await User.create({
-            username: faker.internet.username(),
+            name: faker.internet.username(),
             email: faker.internet.email(),
             password: hashedPassword,
         });
 
-        console.log('👤 Created User:', user.username);
+        console.log('👤 Created User:', user.name);
         console.log('🔐 Password:', password);
 
         // Create JWT token
