@@ -2,10 +2,8 @@ const Task = require('../models/Task');
 
 // GET /tasks
 exports.getAllTasks = async (req, res) => {
-    const userId = req.user.userId;
-
     try {
-        const tasks = await Task.find({user: userId});
+        const tasks = await Task.find({user: req.user.userId});
         res.json(tasks);
     } catch (err) {
         res.status(500).json({error: 'Failed to fetch tasks'});
@@ -14,13 +12,12 @@ exports.getAllTasks = async (req, res) => {
 
 // POST /tasks
 exports.createTask = async (req, res) => {
-    const userId = req.user.userId;
     const {title} = req.body;
 
     if (!title) return res.status(400).json({error: 'Title is required'});
 
     try {
-        const task = await Task.create({title, user: userId});
+        const task = await Task.create({title, user: req.user.userId});
         res.status(201).json(task);
     } catch (err) {
         res.status(500).json({error: 'Failed to create task'});
@@ -29,13 +26,12 @@ exports.createTask = async (req, res) => {
 
 // PUT /tasks/:id
 exports.updateTask = async (req, res) => {
-    const userId = req.user.userId;
     const {id} = req.params;
     const {title, completed} = req.body;
 
     try {
         const task = await Task.findOneAndUpdate(
-            {_id: id, user: userId},
+            {_id: id, user: req.user.userId},
             {title, completed},
             {new: true}
         );
@@ -49,11 +45,10 @@ exports.updateTask = async (req, res) => {
 
 // DELETE /tasks/:id
 exports.deleteTask = async (req, res) => {
-    const userId = req.user.userId;
     const {id} = req.params;
 
     try {
-        const task = await Task.findOneAndDelete({_id: id, user: userId});
+        const task = await Task.findOneAndDelete({_id: id, user: req.user.userId});
         if (!task) return res.status(404).json({error: 'Task not found'});
         res.json(task);
     } catch (err) {
