@@ -1,14 +1,12 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
 const mongoose = require('mongoose');
 const {faker} = require('@faker-js/faker');
-require('dotenv').config();
 
 const User = require('./models/User');
 const Task = require('./models/Task');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/task-manager';
-const JWT_SECRET = process.env.JWT_SECRET || 'yourSuperSecretJWTkey';
 
 async function seed() {
     try {
@@ -19,33 +17,48 @@ async function seed() {
         await User.deleteMany();
         await Task.deleteMany();
 
-        const password = faker.internet.password(10);
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const users = [];
 
-        // Create a fake user
-        const user = await User.create({
-            name: faker.internet.username(),
-            email: faker.internet.email(),
-            password: hashedPassword,
+        // Create admin
+        const admin = await User.create({
+            role: 'admin',
+            name: 'SoroushDev',
+            firstname: 'Soroush',
+            lastname: 'Sagharichiha',
+            password: 'Soroush@1380',
+            email: 'sagharichihas@gmail.com',
         });
 
-        console.log('👤 Created User:', user.name);
-        console.log('🔐 Password:', password);
+        console.log('👤 Created Admin:', admin.name);
+        console.log('🔐 Password:', "Soroush@1380");
 
-        // Create JWT token
-        // const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-        // console.log('🔑 JWT Token:', token);
+        users.push(admin);
+
+        // Create fake users
+        for (let i = 0; i < 5; i++) {
+            const password = faker.internet.password(10);
+            const user = await User.create({
+                firstname: faker.person.firstName(),
+                lastname: faker.person.lastName(),
+                name: faker.internet.username(),
+                email: faker.internet.email(),
+                password,
+            });
+            users.push(user);
+        }
 
         // Create fake tasks
         const tasks = [];
 
-        for (let i = 0; i < 5; i++) {
-            tasks.push({
-                title: faker.lorem.sentence(),
-                completed: faker.datatype.boolean(),
-                user: user._id,
-            });
-        }
+        users.forEach((user) => {
+            for (let i = 0; i < 5; i++) {
+                tasks.push({
+                    user: user._id,
+                    title: faker.lorem.sentence(),
+                    completed: faker.datatype.boolean(),
+                });
+            }
+        });
 
         const inserted = await Task.insertMany(tasks);
         console.log(`✅ Inserted ${inserted.length} tasks`);
