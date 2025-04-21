@@ -7,8 +7,8 @@ exports.getAllUsers = async (req, res) => {
         res.json(users);
     } catch (err) {
         res.status(500).json({
-            error: 'Failed to fetch users',
-            message: err.message,
+            message: 'Failed to fetch users',
+            error: err.message,
         });
     }
 };
@@ -26,8 +26,8 @@ exports.createUser = async (req, res) => {
         res.status(201).json(user);
     } catch (err) {
         res.status(500).json({
-            error: 'Failed to create user',
-            message: err.message,
+            message: 'Failed to create user',
+            error: err.message,
         });
     }
 };
@@ -48,8 +48,8 @@ exports.updateUser = async (req, res) => {
         res.json(user);
     } catch (err) {
         res.status(500).json({
-            error: 'Failed to update user',
-            message: err.message,
+            message: 'Failed to update user',
+            error: err.message,
         });
     }
 };
@@ -65,8 +65,8 @@ exports.deleteUser = async (req, res) => {
         res.json(user);
     } catch (err) {
         res.status(500).json({
-            error: 'Failed to delete user',
-            message: err.message,
+            message: 'Failed to delete user',
+            error: err.message,
         });
     }
 };

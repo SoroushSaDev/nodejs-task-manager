@@ -1,4 +1,3 @@
-// controllers/authController.js
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
 
@@ -58,7 +57,7 @@ exports.register = async (req, res) => {
         },
       })
     } catch (err) {
-      res.status(500).json({ message: err.message })
+      res.status(500).json({ error: err.message })
     }
   }
   

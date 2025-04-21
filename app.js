@@ -5,7 +5,6 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
-// const authMiddleware = require('./middleware/authMiddleware');
 const { protect, authorize } = require('./middleware/auth');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 

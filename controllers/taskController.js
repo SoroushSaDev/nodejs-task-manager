@@ -1,12 +1,15 @@
 const Task = require('../models/Task');
 
 // GET /tasks
-exports.getAllTasks = async (req, res) => {
+exports.getUserTasks = async (req, res) => {
     try {
         const tasks = await Task.find({user: req.user.userId});
         res.json(tasks);
     } catch (err) {
-        res.status(500).json({error: 'Failed to fetch tasks'});
+        res.status(500).json({
+            message: 'Failed to fetch tasks',
+            error: err.message,
+        });
     }
 };
 
@@ -20,7 +23,10 @@ exports.createTask = async (req, res) => {
         const task = await Task.create({title, user: req.user.userId});
         res.status(201).json(task);
     } catch (err) {
-        res.status(500).json({error: 'Failed to create task'});
+        res.status(500).json({
+            message: 'Failed to create task',
+            error: err.message,
+        });
     }
 };
 
@@ -39,7 +45,10 @@ exports.updateTask = async (req, res) => {
             return res.status(404).json({error: 'Task not found'});
         res.json(task);
     } catch (err) {
-        res.status(500).json({error: 'Failed to update task'});
+        res.status(500).json({
+            message: 'Failed to update task',
+            error: err.message,
+        });
     }
 };
 
@@ -52,6 +61,22 @@ exports.deleteTask = async (req, res) => {
         if (!task) return res.status(404).json({error: 'Task not found'});
         res.json(task);
     } catch (err) {
-        res.status(500).json({error: 'Failed to delete task'});
+        res.status(500).json({
+            message: 'Failed to delete task',
+            error: err.message,
+        });
+    }
+};
+
+// GET /tasks/all
+exports.getAllTasks = async (req, res) => {
+    try {
+        const tasks = await Task.find().populate('user', 'name email')
+        res.json(tasks)
+    } catch (err) {
+        res.status(500).json({
+            message: 'Failed to fetch tasks',
+            error: err.message,
+        })
     }
 };
