@@ -34,9 +34,9 @@ const taskSchema = new mongoose.Schema({
         },
         default: [],
     },
-    file: {
-        type: String,
-        default: null
+    files: {
+        type: [String],
+        default: [],
     },
 }, {
     timestamps: true

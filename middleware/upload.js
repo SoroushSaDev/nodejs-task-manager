@@ -1,10 +1,10 @@
 const multer = require('multer')
 const path = require('path')
 
-// Define storage
+// Storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/') // make sure this folder exists
+    cb(null, 'uploads/')
   },
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${file.originalname}`
@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   }
 })
 
-// File filter (optional)
+// File filter
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|pdf/
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase())

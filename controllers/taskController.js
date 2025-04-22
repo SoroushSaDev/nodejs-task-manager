@@ -48,7 +48,7 @@ exports.getUserTasks = async (req, res) => {
 // POST /tasks
 exports.createTask = async (req, res) => {
     const {title, category, tags} = req.body;
-    const filePath = req.file ? req.file.path : null;
+    const filePaths = req.files ? req.files.map(file => file.path) : [];
 
     if (!title)
         return res.status(400).json({error: 'Title is required'});
@@ -59,7 +59,7 @@ exports.createTask = async (req, res) => {
             category,
             tags,
             user: req.user.userId,
-            file: filePath,
+            files: filePaths,
         });
         res.status(201).json(task);
     } catch (err) {
