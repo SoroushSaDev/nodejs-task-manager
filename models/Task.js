@@ -24,16 +24,20 @@ const taskSchema = new mongoose.Schema({
         },
         default: 'other',
       },
-      tags: {
+    tags: {
         type: [String],
         validate: {
-          validator: function (val) {
-            return Array.isArray(val)
-          },
-          message: 'Tags must be an array of strings',
+            validator: function (val) {
+                return Array.isArray(val)
+            },
+            message: 'Tags must be an array of strings',
         },
         default: [],
-      }
+    },
+    files: {
+        type: [String],
+        default: [],
+    },
 }, {
     timestamps: true
 });

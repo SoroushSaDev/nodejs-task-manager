@@ -15,14 +15,23 @@ exports.getAllUsers = async (req, res) => {
 
 // POST /users
 exports.createUser = async (req, res) => {
-    const {name, password, email, firstname, lastname} = req.body;
+    const {name, password, email, firstname, lastname, role} = req.body;
+    const filePath = req.file ? req.file.path : null;
 
     if (!name)
         return res.status(400).json({error: 'Name is required'});
     if (!password)
         return res.status(400).json({error: 'Password is required'});
     try {
-        const user = await User.create({name, password, email, firstname, lastname});
+        const user = await User.create({
+            name,
+            password,
+            email,
+            firstname,
+            lastname,
+            role,
+            avatar: filePath,
+        });
         res.status(201).json(user);
     } catch (err) {
         res.status(500).json({
@@ -36,11 +45,19 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     const {id} = req.params;
     const {name, password, email, firstname, lastname} = req.body;
+    const filePath = req.file ? req.file.path : null;
 
     try {
         const user = await User.findOneAndUpdate(
             {_id: id},
-            {name, password, email, firstname, lastname},
+            {
+                name,
+                password,
+                email,
+                firstname,
+                lastname,
+                avatar: filePath,
+            },
             {new: true}
         );
         if (!user)
