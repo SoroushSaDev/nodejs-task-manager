@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema({
         default: 'user'
       },
     refreshToken: { type: String },
+}, {
+  timestamps: true
 });
 
 // Hash password before saving
