@@ -23,6 +23,8 @@ app.use('/api/mail', mailRoutes);
 app.use('/api/tasks', protect, taskRoutes);
 app.use('/api/users', protect, authorize('admin'), userRoutes);
 
+app.use('/uploads', express.static('uploads'))
+
 app.use(notFound)
 app.use(errorHandler)
 

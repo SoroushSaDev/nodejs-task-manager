@@ -10,3 +10,4 @@
 .env
 /prisma
 /src/generated
+/uploads/
