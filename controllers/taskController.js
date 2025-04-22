@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const Task = require('../models/Task');
 
 // GET /tasks
@@ -74,6 +77,7 @@ exports.createTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
     const {id} = req.params;
     const {title, completed, category, tags} = req.body;
+    const filePaths = req.files ? req.files.map(file => file.path) : [];
 
     try {
         const task = await Task.findOneAndUpdate(
@@ -83,6 +87,7 @@ exports.updateTask = async (req, res) => {
                 completed,
                 category,
                 tags,
+                files: filePaths,
             },
             {new: true}
         );
@@ -99,19 +104,23 @@ exports.updateTask = async (req, res) => {
 
 // DELETE /tasks/:id
 exports.deleteTask = async (req, res) => {
-    const {id} = req.params;
+    const task = await Task.findById(req.params.id)
+  
+    if (!task)
+        return res.status(404).json({ message: 'Task not found' })
 
-    try {
-        const task = await Task.findOneAndDelete({_id: id, user: req.user.userId});
-        if (!task) return res.status(404).json({error: 'Task not found'});
-        res.json(task);
-    } catch (err) {
-        res.status(500).json({
-            message: 'Failed to delete task',
-            error: err.message,
-        });
-    }
-};
+    // Delete associated files
+    task.files.forEach(filePath => {
+        const fullPath = path.join(__dirname, '..', filePath)
+        fs.unlink(fullPath, err => {
+            if (err) console.error('Error deleting file:', err)
+        })
+    })
+  
+    await task.deleteOne();
+  
+    res.status(200).json({ message: 'Task and files deleted' })
+  }
 
 // GET /tasks/all
 exports.getAllTasks = async (req, res) => {

@@ -45,11 +45,19 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     const {id} = req.params;
     const {name, password, email, firstname, lastname} = req.body;
+    const filePath = req.file ? req.file.path : null;
 
     try {
         const user = await User.findOneAndUpdate(
             {_id: id},
-            {name, password, email, firstname, lastname},
+            {
+                name,
+                password,
+                email,
+                firstname,
+                lastname,
+                avatar: filePath,
+            },
             {new: true}
         );
         if (!user)
