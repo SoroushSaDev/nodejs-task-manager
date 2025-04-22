@@ -2,25 +2,63 @@ const Task = require('../models/Task');
 
 // GET /tasks
 exports.getUserTasks = async (req, res) => {
+    const {page = 1, limit = 10, completed, title} = req.query
+
+    const query = {user: req.user.userId}
+  
+    if (completed !== undefined) {
+      query.completed = completed === 'true'
+    }
+  
+    if (title) {
+      query.title = {$regex: title, $options: 'i'} // case-insensitive search
+    }
+
+    if (req.query.category) {
+        query.category = req.query.category
+    }
+      
+    if (req.query.tags) {
+        const tagsArray = req.query.tags.split(',') // e.g. tags=urgent,home
+        query.tags = {$in: tagsArray}
+    }
+  
+    const skip = (parseInt(page) - 1) * parseInt(limit)
+  
     try {
-        const tasks = await Task.find({user: req.user.userId});
-        res.json(tasks);
+      const tasks = await Task.find(query)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 })
+  
+      const total = await Task.countDocuments(query)
+  
+      res.json({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+        totalTasks: total,
+        tasks,
+      })
     } catch (err) {
-        res.status(500).json({
-            message: 'Failed to fetch tasks',
-            error: err.message,
-        });
+      res.status(500).json({ message: err.message })
     }
 };
 
 // POST /tasks
 exports.createTask = async (req, res) => {
-    const {title} = req.body;
+    const {title, category, tags} = req.body;
 
-    if (!title) return res.status(400).json({error: 'Title is required'});
+    if (!title)
+        return res.status(400).json({error: 'Title is required'});
 
     try {
-        const task = await Task.create({title, user: req.user.userId});
+        const task = await Task.create({
+            title,
+            category,
+            tags,
+            user: req.user.userId,
+        });
         res.status(201).json(task);
     } catch (err) {
         res.status(500).json({
@@ -33,12 +71,17 @@ exports.createTask = async (req, res) => {
 // PUT /tasks/:id
 exports.updateTask = async (req, res) => {
     const {id} = req.params;
-    const {title, completed} = req.body;
+    const {title, completed, category, tags} = req.body;
 
     try {
         const task = await Task.findOneAndUpdate(
             {_id: id, user: req.user.userId},
-            {title, completed},
+            {
+                title,
+                completed,
+                category,
+                tags,
+            },
             {new: true}
         );
         if (!task)
